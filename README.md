@@ -1,6 +1,6 @@
-# Roblox Hub
+# Area 51 Hub
 
-Script em Luau para Roblox com interface gráfica, feito para executores. Reúne **Fly**, **ESP**, **Fling** e **Anti-Fling** em um menu único, arrastável e minimizável.
+Script em Luau com interface gráfica para o jogo [Survive and Kill the Killers in Area 51](https://www.roblox.com/games/155382109/Survive-and-Kill-the-Killers-in-Area-51), feito para executores.
 
 <!-- Coloque um print em assets/screenshot.png e descomente a linha abaixo -->
 <!-- ![Menu](assets/screenshot.png) -->
@@ -9,76 +9,65 @@ Script em Luau para Roblox com interface gráfica, feito para executores. Reúne
 
 | Função | O que faz |
 |---|---|
-| **Fly** | Voa na direção da câmera (W/A/S/D, Espaço sobe, Ctrl esquerdo desce). Velocidade ajustável de 10 a 300. |
-| **ESP** | Contorno vermelho visível através das paredes, com nome e distância (em studs) de cada jogador. |
-| **Fling** | Escolha um jogador na lista e arremesse. Sem seleção, usa o jogador mais próximo. Depois do fling você volta para a posição original. |
-| **Anti-Fling** | Desativa a colisão dos outros jogadores com você e zera sua velocidade caso ela dispare de repente. |
+| **ESP Assassinos** | Contorno laranja visível através das paredes, com nome, distância e vida de cada assassino. |
+| **Kill Aura** | Equipa sua arma e ataca o assassino mais próximo dentro do alcance (ajustável de 5 a 60 studs). |
+| **Auto Farm** | Teleporta para trás do assassino mais próximo e ataca sem parar. |
+| **Fuga Automática** | Quando a vida cai abaixo do limite (ajustável, padrão 60%) e há um assassino perto, teleporta para uma plataforma no alto. Volta quando a vida recuperar ou após 10s. |
 
-## Atalhos
-
-| Tecla | Ação |
-|---|---|
-| `F` | Fly liga/desliga |
-| `G` | Fling no alvo selecionado (ou no mais próximo) |
-| `T` | ESP liga/desliga |
-| `Y` | Anti-Fling liga/desliga |
-| `↑` / `↓` | Aumenta / diminui velocidade do fly (só nos scripts standalone) |
-| `RightShift` | Esconde/mostra o menu |
+O menu pode ser arrastado, minimizado com **-** e fechado com **X** (o fechar desliga tudo e limpa o ESP). **RightShift** esconde e mostra o menu.
 
 ## Como usar
 
-1. Abra o Roblox e entre no jogo desejado.
+1. Abra o jogo no Roblox.
 2. Abra seu executor e faça o *Attach*.
-3. Cole o conteúdo de [`hub.lua`](hub.lua) e clique em **Run**.
+3. Cole o conteúdo de [`area51.lua`](area51.lua) e clique em **Run**.
 
 Ou carregue direto do GitHub (troque `SEU_USUARIO` e `SEU_REPO`):
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPO/main/hub.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPO/main/area51.lua"))()
 ```
 
-## Script do jogo: Survive and Kill the Killers in Area 51
+## Como funciona
 
-[`scripts/area51.lua`](scripts/area51.lua) é um menu separado para o jogo [Survive and Kill the Killers in Area 51](https://www.roblox.com/games/155382109/Survive-and-Kill-the-Killers-in-Area-51).
+- Os assassinos são detectados como qualquer `Humanoid` vivo no `workspace` que não pertença a um jogador. A lista é atualizada a cada 0,5s.
+- O ataque usa `Tool:Activate()` e, se o executor suportar, `firetouchinterest` entre o cabo da arma e o assassino. Funciona melhor com armas corpo a corpo. Armas de tiro dependem de mira e podem errar.
+- Se o jogo tiver NPCs neutros (lojista, por exemplo), adicione o nome exato deles na tabela `IGNORE_NAMES` no topo do script para que não sejam tratados como alvo.
+- Se a vida não regenerar no jogo, a fuga apenas espera os 10s e volta.
 
-| Função | O que faz |
-|---|---|
-| **ESP Assassinos** | Contorno laranja, nome, distância e vida de cada assassino. |
-| **Kill Aura** | Equipa sua arma e ataca o assassino mais próximo dentro do alcance ajustável. |
-| **Auto Farm** | Teleporta para trás do assassino mais próximo e ataca sem parar. |
-| **Fuga Automática** | Quando a vida cai abaixo do limite e há um assassino perto, teleporta para uma plataforma no alto e volta depois de recuperar a vida (ou 10s). |
+## Configuração rápida
 
-Para carregar direto do GitHub:
+No início do arquivo existe a tabela `cfg`, onde você pode mudar os valores padrão:
 
 ```lua
-loadstring(game:HttpGet("https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPO/main/scripts/area51.lua"))()
+local cfg = {
+	esp = false,
+	aura = false,
+	farm = false,
+	escape = false,
+	range = 15,      -- alcance do kill aura (studs)
+	hpEscape = 60,   -- foge quando a vida estiver abaixo disso (%)
+}
 ```
-
-Os assassinos são detectados como qualquer `Humanoid` no `workspace` que não seja de um jogador. Se o jogo tiver NPCs neutros, adicione o nome deles na tabela `IGNORE_NAMES` no topo do script. Se a sua arma for de tiro e não corpo a corpo, o ataque usa `Tool:Activate()`, então a mira pode não acertar.
 
 ## Estrutura
 
 ```
-roblox-hub/
-├── hub.lua                    # script principal com interface
-├── scripts/
-│   ├── fly.lua                # só o fly, sem interface
-│   ├── fly_fling_esp.lua      # fly + fling + ESP por teclas, sem interface
-│   └── area51.lua             # script do jogo Survive and Kill the Killers in Area 51
-├── assets/                    # prints e imagens
+area51-hub/
+├── area51.lua     # script principal
+├── assets/        # prints e imagens
 ├── LICENSE
 └── README.md
 ```
 
 ## Compatibilidade
 
-- Testado com a estrutura do **Potassium**. Deve funcionar em executores que suportem `gethui()` ou acesso ao `CoreGui` (o script usa `gethui()` e cai para `CoreGui` se não existir).
-- O Fling depende da física do jogo. Em jogos com colisão entre jogadores desativada, ele pode não ter efeito.
-- Jogos com anti-cheat forte podem detectar fly, fling e velocidade anormal.
+- Feito para executores com suporte a `gethui()` ou acesso ao `CoreGui` (cai para `CoreGui` se `gethui` não existir).
+- O jogo pode ser atualizado e mudar a estrutura dos NPCs e armas. Se algo parar de funcionar, abra uma *issue* com um print do Explorer mostrando como os assassinos e a arma aparecem.
 
 ## Aviso
 
-Este projeto é apenas para fins educacionais e de estudo de Luau. Usar executores em jogos de terceiros viola os Termos de Uso do Roblox e pode resultar em banimento da conta. Use por sua conta e risco, de preferência em jogos seus ou servidores privados, e não use o Fling para atrapalhar a partida de outras pessoas. Este projeto não tem qualquer afiliação com a Roblox Corporation.
+Este projeto é apenas para fins educacionais e de estudo de Luau. Usar executores em jogos de terceiros viola os Termos de Uso do Roblox e pode resultar em banimento da conta. Use por sua conta e risco. Este projeto não tem qualquer afiliação com a Roblox Corporation nem com o criador do jogo.
 
 ## Licença
 
